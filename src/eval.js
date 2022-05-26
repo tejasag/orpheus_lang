@@ -1,4 +1,8 @@
 class Eval {
+  constructor() {
+    this.env = {};
+  }
+
   eval(program) {
     let result = null;
     for (const statement of program) {
@@ -12,6 +16,9 @@ class Eval {
       case "expression":
         return this.evalExpression(statement);
         break;
+      case "let":
+        return this.evalLetStatement(statement);
+        break;
       default:
         return null;
     }
@@ -21,6 +28,10 @@ class Eval {
     switch (statement.expressionType) {
       case "literal":
         return statement.expr;
+      case "identifier":
+        let ident = statement.expr.split(":")[1];
+        if (Object.keys(this.env).indexOf(ident) === -1) return;
+        else return this.env[ident];
       case "prefix":
         let right = this.evalExpression(statement.expr);
         return this.evalPrefixExpr(statement.prefix, right);
@@ -50,10 +61,11 @@ class Eval {
   }
 
   evalNumPrefixExpr(prefix, expr) {
-    if (typeof expr != "number")
+    if (isNaN(expr))
       throw new Error(
         `Expected "number" with the prefix "${prefix}". Found ${expr}.`
       );
+    expr = parseInt(expr);
 
     switch (prefix) {
       case "plus":
@@ -89,6 +101,12 @@ class Eval {
       case "greaterthaneq":
         return left >= right;
     }
+  }
+
+  evalLetStatement(statement) {
+    let expr = this.evalExpression(statement.expr);
+    this.env[statement.ident] = expr;
+    return;
   }
 }
 

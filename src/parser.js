@@ -1,5 +1,4 @@
-const { Lexer } = require("./lexer.js");
-const { Eval } = require("./eval.js");
+const { Lexer, keywords } = require("./lexer.js");
 
 class Parser {
   constructor(lexer) {
@@ -28,10 +27,27 @@ class Parser {
 
   parseStatement() {
     switch (this.currentToken) {
-      // case "let": ....
+      case "let":
+        return this.parseLetStmt();
       default:
         return this.parseExprStmt();
     }
+  }
+
+  parseLetStmt() {
+    this.nextToken();
+    let ident;
+    if (!this.currentToken.startsWith("ident:"))
+      throw new Error(`Expected valid identifier after "let"`);
+    else ident = this.currentToken.split(":")[1];
+
+    this.nextToken();
+    if (this.currentToken != "assign")
+      throw new Error(`Expected assign operator after the identifier"`);
+
+    this.nextToken();
+    let expr = this.parseExpr();
+    return { ident, expr, statementType: "let" };
   }
 
   parseExprStmt() {
@@ -59,6 +75,8 @@ class Parser {
           expr = { expr: this.currentToken, expressionType: "literal" };
         else if (typeof this.currentToken === "boolean")
           expr = { expr: this.currentToken, expressionType: "literal" };
+        else if (this.currentToken.startsWith("ident:"))
+          expr = { expr: this.currentToken, expressionType: "identifier" };
         else expr = null;
     }
 
@@ -111,7 +129,7 @@ class Parser {
       case "minus":
         infix = "subtract";
         break;
-      case "equal":
+      case "eq":
         infix = "equals";
         break;
       case "nteq":
@@ -140,7 +158,3 @@ class Parser {
 }
 
 module.exports = { Parser };
-
-let par = new Parser(new Lexer("100 < 4+4")).parseProgram();
-let ev = new Eval();
-console.log(ev.eval(par));

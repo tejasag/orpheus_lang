@@ -1,4 +1,4 @@
-const keywords = { false: false, true: true };
+const keywords = { false: false, true: true, let: "let" };
 const eof = "\u0000";
 
 class Lexer {
@@ -8,7 +8,7 @@ class Lexer {
     this.ch = input[0];
     this.readPos = 1;
 
-    this.input = this.input.replaceAll(/[\r\t\n" "]/g, "");
+    //this.input = this.input.replaceAll(/[\r\t\n" "]/g, "");
   }
 
   readChar() {
@@ -30,6 +30,14 @@ class Lexer {
   }
 
   nextToken() {
+    while (
+      this.ch === " " ||
+      this.ch === "\t" ||
+      this.ch === "\n" ||
+      this.ch === "\r"
+    )
+      this.readChar();
+
     let token;
     switch (this.ch) {
       case ";":
@@ -38,7 +46,7 @@ class Lexer {
       case "=":
         if (this.peekChar() == "=") {
           this.readChar();
-          token = "equal";
+          token = "eq";
         } else token = "assign";
         break;
       case ">":
@@ -75,7 +83,9 @@ class Lexer {
           let ident = this.readIdentifier();
           if (Object.keys(keywords).indexOf(ident) != -1) {
             return keywords[ident];
-          } else "illegal";
+          } else {
+            return `ident:${ident}`;
+          }
         } else "illegal";
     }
 
@@ -104,4 +114,4 @@ class Lexer {
   }
 }
 
-module.exports = { Lexer };
+module.exports = { Lexer, keywords };

@@ -10,10 +10,11 @@ let statement;
 
 while(statement != "quit")  {
     statement = prompt(">>> ");
-    if(statement === "quit"){
+    if(statement === "quit" || statement === null){
         console.log("BYEEEEEEE!");
         break;
     }
+    if(statement === "")continue;
     statement = statement;
     let par = new Parser(new Lexer(statement)).parseProgram();
     let evaluated= eval.eval(par);

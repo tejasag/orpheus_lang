@@ -28,10 +28,31 @@ class Parser {
 
     parseStatement() {
         switch (this.currentToken) {
-            // case let
+            case "let":
+                return this.parseLetStmt();
             default:
                 return this.parseExprStmt();
         }
+    }
+
+    parseLetStmt() {
+        // let a = !true;
+        this.nextToken();
+
+        if(!this.currentToken.startsWith("ident:")) {
+            throw new Error(`Expected value after "let" to be an identifier`);
+        }
+
+        let ident = this.currentToken.split(":")[1];
+
+        this.nextToken();
+        if(this.currentToken != "assignment"){
+            throw new Error(`Expected assignment operator after identifier`);
+        }
+
+        this.nextToken();
+        let expr = this.parseExpr();
+        return { ident, expr, statementType: "let" };
     }
 
     parseExprStmt() {
@@ -61,6 +82,9 @@ class Parser {
             default:
                 if(!isNaN(this.currentToken)) 
                     expr =  { expr: this.currentToken, expressionType: "literal" };
+                else if(this.currentToken.startsWith("ident:")) {
+                    expr = { expr: this.currentToken, expressionType: "identifier" };
+                }
         }
 
         // infix expressions 3 + 3, 4-4
@@ -156,6 +180,3 @@ class Parser {
 }
 
 module.exports = { Parser };
-
-const p = new Parser(new Lexer("!false"));
-console.log(p.parseProgram())

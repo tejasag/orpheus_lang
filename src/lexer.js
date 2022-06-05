@@ -1,4 +1,4 @@
-const keywords = { true: true, false: false };
+const keywords = { true: true, false: false, let: "let" };
 const eof = "\u0000";
 
 class Lexer {
@@ -43,7 +43,7 @@ class Lexer {
                     token = "equals";
                     this.readChar();
                 } else {
-                    token = "asignment";
+                    token = "assignment";
                 }
                 break;
             case ">":
@@ -86,6 +86,8 @@ class Lexer {
                     let string = this.readWord();
                     if(Object.keys(keywords).includes(string)) {
                         return keywords[string];
+                    } else {
+                        return `ident:${string}`
                     }
                 }
         }
@@ -101,7 +103,7 @@ class Lexer {
             this.readChar();
         }
         let finalPosition = this.position;
-        return this.input.substring(position, finalPosition);
+        return parseInt(this.input.substring(position, finalPosition));
     }
 
     readWord() {
